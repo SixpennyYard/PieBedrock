@@ -1,3 +1,4 @@
 PieRakNet>=1.0.6
 PyJWT
 NBT
+git+https://github.com/PieMC-Dev/rak_net.git
