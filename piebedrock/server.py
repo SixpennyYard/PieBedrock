@@ -68,10 +68,11 @@ class BedrockServer:
         self.raknet.name = self.server_status
 
     def on_game_packet(self, packet: GamePacket, connection: RakNetConnection):
-        if packet.packet_id == 0x01:
-            print(f"New Login Packet: {str(packet.body)}")
-        else:
-            print(f"New GamePacket ({hex(packet.packet_id)}): {str(packet.body)}")
+        for pkt in packet.packets:
+            if pkt[0] == 0x01:
+                print(f"New Login Packet: {str(pkt[1:])}")
+            else:
+                print(f"New GamePacket ({hex(pkt[0])}): {str(pkt[1:])}")
 
     def on_new_incoming_connection(self, connection: RakNetConnection):
         print(f"New Incoming Connection: {str(connection.address)}")
