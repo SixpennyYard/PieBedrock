@@ -68,28 +68,30 @@ class BedrockServer:
         self.raknet.name = self.server_status
 
     def on_game_packet(self, packet: GamePacket, connection: RakNetConnection):
-        if packet.body[0] == 0x01:
-            self.logger.info(f"New Login Packet: {str(packet.body)}")
+        if packet.packet_id == 0x01:
+            print(f"New Login Packet: {str(packet.body)}")
+        else:
+            print(f"New GamePacket ({hex(packet.packet_id)}): {str(packet.body)}")
 
     def on_new_incoming_connection(self, connection: RakNetConnection):
-        self.logger.info(f"New Incoming Connection: {str(connection.address)}")
+        print(f"New Incoming Connection: {str(connection.address)}")
 
     def on_disconnect(self, connection: RakNetConnection):
-        self.logger.info(f"{str(connection.address)} disconnected")
+        print(f"{str(connection.address)} disconnected")
 
-    def on_frame(self, packet: Frame, connection: RakNetConnection):
-        self.logger.info(f"New Unknown Packet: {str(packet.body)}")
+    def on_frame(self, frame: Frame, connection: RakNetConnection):
+        print(f"New frame: {str(frame.body)}")
 
     def start(self):
         if not self.initialized:
             self.raknet_init()
         self.running = True
-        self.logger.info(f"Running on {self.hostname}:{str(self.port)} ({str(self.get_time_ms())}s).")
+        print(f"Running on {self.hostname}:{str(self.port)} ({str(self.get_time_ms())}s).")
         while True:
             self.raknet.handle()
             self.raknet.tick()
 
     def stop(self):
-        self.logger.info("Stopping...")
+        print("Stopping...")
         self.running = False
-        self.logger.info("Stop")
+        print("Stop")
