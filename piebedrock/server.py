@@ -1,8 +1,8 @@
 import threading
-from pieraknet import Server as PieRakNet
-from pieraknet.packets.game_packet import GamePacket
-from pieraknet.connection import Connection as RakNetConnection
-from pieraknet.packets.frame_set import Frame
+from rak_net import Server as RakNetServer
+from rak_net.protocol.packet.game_packet import GamePacket
+from rak_net.connection import Connection as RakNetConnection
+from rak_net.protocol.packet.frame import Frame
 
 import logging
 import os
@@ -36,17 +36,15 @@ class BedrockServer:
         self.timeout = timeout
         self.running = False
         self.start_time = int(time.time())
-        self.pieraknet_thread = None
         self.dev_mode = dev_mode
 
-    def pieraknet_init(self):
-        if self.dev_mode:
-            logging.getLogger("PierakNet").setLevel(logging.DEBUG)
-            logging.getLogger("PierakNet").addHandler(logging.StreamHandler())
-        self.pieraknet = PieRakNet(self.hostname, self.port, logging.getLogger("PierakNet"))
+    def raknet_init(self):
+        #if self.dev_mode:
+        #    logging.getLogger("RakNet").setLevel(logging.DEBUG)
+        #    logging.getLogger("PieRakNet").addHandler(logging.StreamHandler())
+        self.raknet = RakNetServer(self.raknet_version, self.hostname, self.port)
         self.update_server_status()
-        self.pieraknet.protocol_version = self.raknet_version
-        self.pieraknet.timeout = self.timeout
+        self.raknet.interface = self
         self.initialized = True
 
     def get_time_ms(self):
@@ -67,10 +65,9 @@ class BedrockServer:
             f"{self.port}",
             f"{self.port_v6}"
         ]) + ";"
-        self.pieraknet.name = self.server_status
+        self.raknet.name = self.server_status
 
     def on_game_packet(self, packet: GamePacket, connection: RakNetConnection):
-        packet.decode()
         if packet.body[0] == 0x01:
             self.logger.info(f"New Login Packet: {str(packet.body)}")
 
@@ -80,7 +77,7 @@ class BedrockServer:
     def on_disconnect(self, connection: RakNetConnection):
         self.logger.info(f"{str(connection.address)} disconnected")
 
-    def on_unknown_packet(self, packet: Frame, connection: RakNetConnection):
+    def on_frame(self, packet: Frame, connection: RakNetConnection):
         self.logger.info(f"New Unknown Packet: {str(packet.body)}")
 
     def start(self):
@@ -88,12 +85,11 @@ class BedrockServer:
             self.pieraknet_init()
         self.running = True
         self.logger.info(f"Running on {self.hostname}:{str(self.port)} ({str(self.get_time_ms())}s).")
-        self.pieraknet.start()
+        while True:
+            self.raknet.handle()
+            self.raknet.tick()
 
     def stop(self):
         self.logger.info("Stopping...")
         self.running = False
-        if self.pieraknet_thread:
-            self.pieraknet.stop()
-            self.pieraknet_thread.join()
         self.logger.info("Stop")

@@ -8,7 +8,7 @@ def readme():
 
 setup(
     name='PieBedrock',
-    version='1.0.3.8-r',
+    version='1.0.3.9',
     author='lapismyt',
     author_email='PieMC.Developers@gmail.com',
     description='Minecraft: Bedrock Edition network protocol implementation, written in Python. Created for PieMC.',
@@ -19,7 +19,8 @@ setup(
     install_requires=[
         "PieRakNet>=1.0.6",
         "PyJWT",
-        "NBT"
+        "NBT",
+        "rak_net @ git+https://github.com/PieMC-Dev/rak_net.git"
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
